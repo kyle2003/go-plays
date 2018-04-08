@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -21,34 +20,36 @@ type Theme struct {
 //const base = "http://xxgege.net/"
 const base = "https://studygolang.com/topics"
 
-func (t *Theme) Handler(res http.ResponseWriter, req *http.Request) {
-	data, err := GetTopicData(t.Name)
-
-	fmt.Fprintf(res, "hello %q", t.Name)
-	fmt.Fprintf(res, "hello %q", data)
-
-	if err != nil {
-		log.Fatal("Error geting topic")
-	}
-
+type TopicDetails struct {
+	title string
+	imgs  []string
 }
 
-// GetTopicData Return the topic data
-func GetTopicData(name string) (data []interface{}, err error) {
-	data, err = ParseTheme(name)
+// ParseTopic to return topic details
+func ParseTopic(t topic) (data interface{}, err error) {
+	url := base + t.Title
+	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatal("Failed to retreive data from theme")
+		log.Fatal("Failed to get content from %v", url)
+		return
 	}
+
+	defer resp.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		log.Fatal("Failed to get content from %v", url)
+		return
+	}
+	doc.Find("test").Each(func(i int, s *goquery.Selection) {
+
+	})
 	return
 }
 
-func ParseTopic(topic string) {
-
-}
-
 // ParseTheme to retrieve data
-func ParseTheme(cate string) (topics []interface{}, err error) {
+func ParseTheme(cate string) (topics []topic, err error) {
 	log.Println(cate)
 
 	var t topic
