@@ -12,6 +12,6 @@ func main() {
 	artzp.Name = "artzp"
 
 	modules.GetTopicData(artzp.Name)
-	http.HandleFunc("artzp/", artzp.Handler)
+	http.HandleFunc("/artzp", artzp.Handler)
 	http.ListenAndServe("localhost:8866", nil)
 }

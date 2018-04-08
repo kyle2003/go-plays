@@ -1,18 +1,17 @@
 package modules
 
 import (
-	"io"
+	"fmt"
 	"log"
 	"net/http"
-	"os"
 
-	"golang.org/x/net/html"
+	"github.com/PuerkitoBio/goquery"
 )
 
 type topic struct {
 	Topic string `json:"topic"`
 	Title string `json:"title"`
-	Thumb string `json:"thumb`
+	Thumb string `json:"thumb"`
 }
 
 type Theme struct {
@@ -20,19 +19,22 @@ type Theme struct {
 }
 
 //const base = "http://xxgege.net/"
-const Base = "http://baidu.com"
+const base = "https://studygolang.com/topics"
 
 func (t *Theme) Handler(res http.ResponseWriter, req *http.Request) {
 	data, err := GetTopicData(t.Name)
 
+	fmt.Fprintf(res, "hello %q", t.Name)
+	fmt.Fprintf(res, "hello %q", data)
+
 	if err != nil {
 		log.Fatal("Error geting topic")
 	}
-	//io.Copy(res, data)
-	log.Println(data)
+
 }
 
-func GetTopicData(name string) (data []topic, err error) {
+// GetTopicData Return the topic data
+func GetTopicData(name string) (data []interface{}, err error) {
 	data, err = ParseTheme(name)
 
 	if err != nil {
@@ -41,27 +43,42 @@ func GetTopicData(name string) (data []topic, err error) {
 	return
 }
 
-func ParseTheme(cate string) (topics []topic, err error) {
-	url := base + cate
+func ParseTopic(topic string) {
+
+}
+
+// ParseTheme to retrieve data
+func ParseTheme(cate string) (topics []interface{}, err error) {
+	log.Println(cate)
+
+	var t topic
+	url := base
 	resp, err := http.Get(url)
-	log.Println(url)
+
+	if err != nil {
+		log.Fatal("Failed to get content from %v", url)
+		return
+	}
 
 	defer resp.Body.Close()
 
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		log.Fatal("Failed to get content from %v", url)
+		return
 	}
 
-	_, err = io.Copy(os.Stdout, resp.Body)
+	doc.Find(".topic").Each(func(i int, s *goquery.Selection) {
+		t.Topic = s.Find(".title a").Text()
+		s.Find(".meta a").Each(func(i int, ss *goquery.Selection) {
+			if ss.HasClass("node") {
+				t.Title = ss.Text()
+				t.Thumb, _ = ss.Attr("href")
+			}
+		})
 
-	doc, err := html.Parse(resp.Body)
-	if err != nil {
-		log.Fatal("Failed to get content from %v", url)
-	}
-
-	log.Println(doc.Attr, doc.Data)
-
-	log.Println(doc)
+		topics = append(topics, t)
+	})
 
 	return
 }
