@@ -1,27 +1,54 @@
 package main
 
 import (
+	"fmt"
+	"goplays/models/subject"
+	"goplays/models/theme"
+	"goplays/modules/utils"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
-
-	"github.com/go-plays/modules"
-	"github.com/gorilla/mux"
+	"os"
 )
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/{theme}", modules.ThemeHandler)
-	r.HandleFunc("/{theme}/{topic}", modules.TopicHandler)
-	http.Handle("/", r)
+	var th = theme.Theme{
+		TheTitle: "artzp",
+	}
+	utils.ProcessDir("图片")
 
-	srv := &http.Server{
-		Handler: r,
-		Addr:    "127.0.0.1:8000",
-		// Good practice: enforce timeouts for servers you create!
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+	for _, sub := range th.GetSubjects() {
+		utils.ProcessDir("图片/" + sub.SubTitle)
+
+		for _, img := range sub.Images {
+			fmt.Printf("Downloading: %v\n", img.ImgHref)
+			//Download(img)
+
+			//time.Sleep(time.Duration(15) * time.Second)
+		}
+	}
+}
+
+func Download(img subject.Image) {
+	resp, err := http.Get(img.ImgHref)
+	if err != nil {
+		fmt.Printf("%v", err)
+	}
+	defer resp.Body.Close()
+
+	// Build path
+	imgByte, err := ioutil.ReadAll(resp.Body)
+
+	var fh *os.File
+	file := "图片/" + img.ImgSubTitle + "/" + img.ImgName + ".jpg"
+	fh, err = os.Create(file)
+	if err != nil {
+		log.Fatalf("Failed to create img file: %s", file)
+	} else {
+		log.Printf("Creating: %s", file)
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	defer fh.Close()
+
+	fh.Write(imgByte)
 }
