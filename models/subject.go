@@ -1,13 +1,13 @@
-package subject
+package models
 
 import (
 	"fmt"
-	"goplays/constants"
-	"goplays/modules/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"pandora/constants"
+	"pandora/modules/utils"
 	"regexp"
 	"strings"
 )

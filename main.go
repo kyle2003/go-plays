@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"goplays/models/subject"
-	"goplays/models/theme"
-	"goplays/modules/utils"
+	"pandora/models/subject"
+	"pandora/models/theme"
+	"pandora/modules/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
