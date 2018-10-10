@@ -1,3 +1,3 @@
 package constants
 
-const BASE = "http://xxgege.net/"
+const BASE = "https://xxgege.net"
