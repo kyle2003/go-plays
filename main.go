@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
-	"pandora/models/subject"
-	"pandora/models/theme"
-	"pandora/modules/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"pandora/constants"
+	"pandora/models"
+
+	"time"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
-func main() {
+/*
 	var th = theme.Theme{
 		TheTitle: "artzp",
 	}
@@ -27,10 +31,31 @@ func main() {
 			//time.Sleep(time.Duration(15) * time.Second)
 		}
 	}
+*/
+func main() {
+	db, err := gorm.Open("sqlite3", "./db/test.db")
+	if err != nil {
+		return
+	}
+	defer db.Close()
+	c := models.Category{}
+	c.Name = "test"
+	c.Title = "teset"
+	c.URL = "http://test"
+	c.ReapStatus = constants.REAP_STATUS__NOTDONE
+	c.DownloadStatus = constants.DOWNLOAD_STATUS__NOTDONE
+	c.Created = time.Now().Unix()
+	c.Updated = time.Now().Unix()
+	c.Enabled = uint8(1)
+	c.SubjectsNum = 1
+	c.Limit = 2
+
+	db.AutoMigrate(&c)
+	db.Create(&c)
 }
 
-func Download(img subject.Image) {
-	resp, err := http.Get(img.ImgHref)
+func Download(img models.Image) {
+	resp, err := http.Get(img.URL)
 	if err != nil {
 		fmt.Printf("%v", err)
 	}
@@ -40,7 +65,7 @@ func Download(img subject.Image) {
 	imgByte, err := ioutil.ReadAll(resp.Body)
 
 	var fh *os.File
-	file := "图片/" + img.ImgSubTitle + "/" + img.ImgName + ".jpg"
+	file := "图片/" + img.Title + "/" + img.Name + ".jpg"
 	fh, err = os.Create(file)
 	if err != nil {
 		log.Fatalf("Failed to create img file: %s", file)

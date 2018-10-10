@@ -2,34 +2,40 @@ package models
 
 import (
 	"pandora/constants"
-	"pandora/models/subject"
 	"pandora/modules/utils"
-	"regexp"
+	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type Category struct {
-	// 自增ID
-	ID uint
-	// 拼音名
-	Name string
-	// 中文名
-	Title string
-	// URL地址
-	URL string
+	// object的属性
+	PandoraObj
 	// 涉及范围
-	Range string
-	// 是否采集完成
-	Reaped constants.ReapStatus
+	Limit int
 	// 主题数
-	Subjects int
-	// 创建时间戳
-	Created uint64
-	// 更新时间戳
-	Updated uint64
+	SubjectsNum int
+}
+
+func (c *Category) Create(db *gorm.DB) error {
+	c.Name = "test"
+	c.Title = "teset"
+	c.URL = "http://test"
+	c.ReapStatus = constants.REAP_STATUS__NOTDONE
+	c.DownloadStatus = constants.DOWNLOAD_STATUS__NOTDONE
+	c.Created = time.Now().Unix()
+	c.Updated = time.Now().Unix()
+	c.Enabled = uint8(1)
+	c.SubjectsNum = 1
+	c.Limit = 2
+	err := db.Create(c).Error
+
+	return err
+
 }
 
 func (th Category) GetHtml() string {
-	url := constants.BASE + th.TheTitle
+	url := constants.BASE + th.Title
 	return string(utils.GetHtml(url))
 }
 
@@ -38,6 +44,7 @@ func (th Category) GetPageLimit() int {
 	return utils.GetPageLimit(html)
 }
 
+/*
 func (th Category) GetSubjects() []subject.Subject {
 	html := th.GetHtml()
 
@@ -62,3 +69,4 @@ func (th Category) GetSubjects() []subject.Subject {
 
 	return subjects
 }
+*/

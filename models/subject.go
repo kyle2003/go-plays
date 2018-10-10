@@ -12,20 +12,14 @@ import (
 	"strings"
 )
 
-type Image struct {
-	ImgName     string
-	ImgHref     string
-	ImgSubTitle string
-}
-
 type Subject struct {
-	SubTitle string
-	SubHref  string
-	Images   []Image
+	PandoraObj
+	CategoryID uint64
+	ImagesNum  int8
 }
 
 func (sub Subject) GetImages() []Image {
-	url := constants.BASE + sub.SubHref
+	url := constants.BASE + sub.URL
 	html := utils.GetHtml(url)
 	reg, _ := regexp.Compile(`img src="//(.*.jpg)"`)
 	urlsStr := reg.FindString(string(html))
@@ -42,9 +36,9 @@ func (sub Subject) GetImages() []Image {
 			url := "http://" + regImg.ReplaceAllString(str, repl)
 
 			if m, _ := regexp.MatchString(".jpg$", url); m {
-				img.ImgName = utils.Basename(str)
-				img.ImgHref = url
-				img.ImgSubTitle = sub.SubTitle
+				img.Name = utils.Basename(str)
+				img.URL = url
+				img.Title = sub.Title
 			}
 
 			images = append(images, img)
@@ -54,7 +48,7 @@ func (sub Subject) GetImages() []Image {
 }
 
 func DownloadImg(img Image) {
-	resp, err := http.Get(img.ImgHref)
+	resp, err := http.Get(img.URL)
 	if err != nil {
 		fmt.Printf("%v", err)
 	}
@@ -64,13 +58,12 @@ func DownloadImg(img Image) {
 	imgByte, err := ioutil.ReadAll(resp.Body)
 
 	var fh *os.File
-	file := "图片/" + img.ImgSubTitle + "/" + img.ImgName + ".jpg"
+	file := "图片/" + img.Title + "/" + img.Name + ".jpg"
 	fh, err = os.Create(file)
+	defer fh.Close()
 	if err != nil {
 		log.Fatalf("Failed to create img file: %s", file)
 	}
-
-	defer fh.Close()
 
 	fh.Write(imgByte)
 }
