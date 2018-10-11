@@ -35,6 +35,7 @@ func GetPageLimit(html string) int {
 	num, _ := strconv.Atoi(string(tmp))
 	return num
 }
+
 func RandStr(prefix string) string {
 	rand.Seed(time.Now().UTC().UnixNano())
 	return prefix + strconv.Itoa(rand.Intn(1000))

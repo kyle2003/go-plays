@@ -7,26 +7,47 @@ import (
 	"net/http"
 	"os"
 	"pandora/constants"
-	"pandora/modules/utils"
+	"pandora/utils"
 	"regexp"
 	"strings"
+	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 type Subject struct {
+	// generic attributes
 	PandoraObj
-	CategoryID uint64
-	ImagesNum  int8
+	// categoryID where subject belongs to
+	CategoryID uint64 `gorm:"column:f_category_id" json:""`
+	// images collection num
+	ImagesNum int8 `gorm:"column:f_images_num" json:""`
+	// the thumb imageid
+	ThumbImageID uint64 `gorm:"column:f_thumb_image_id" json:""`
+	// images object collection
+	Images []Image `gorm:"-" json:"-"`
 }
 
-func (sub Subject) GetImages() []Image {
-	url := constants.BASE + sub.URL
+// Create db
+func (s *Subject) Create(db *gorm.DB) error {
+	// default attributes
+	s.ReapStatus = constants.REAP_STATUS__NOTDONE
+	s.DownloadStatus = constants.DOWNLOAD_STATUS__NOTDONE
+	s.Created = time.Now().Unix()
+	s.Updated = time.Now().Unix()
+
+	db.AutoMigrate(s)
+	return db.Create(s).Error
+}
+
+func (s Subject) ReapImages(db *gorm.DB) []Image {
+	url := constants.BASE + s.URL
 	html := utils.GetHtml(url)
 	reg, _ := regexp.Compile(`img src="//(.*.jpg)"`)
 	urlsStr := reg.FindString(string(html))
 	reg, _ = regexp.Compile(`img|alt`)
 	regImg, _ := regexp.Compile(`.*//(.*.jpg).*`)
 	repl := "${1}"
-	var images []Image
 
 	// 截取到的字符串
 	for _, str := range reg.Split(urlsStr, -1) {
@@ -38,13 +59,14 @@ func (sub Subject) GetImages() []Image {
 			if m, _ := regexp.MatchString(".jpg$", url); m {
 				img.Name = utils.Basename(str)
 				img.URL = url
-				img.Title = sub.Title
+				img.Title = s.Title
 			}
 
-			images = append(images, img)
+			s.Images = append(s.Images, img)
+			img.Create(db)
 		}
 	}
-	return images
+	return s.Images
 }
 
 func DownloadImg(img Image) {

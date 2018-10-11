@@ -7,51 +7,42 @@ import (
 	"net/http"
 	"os"
 	"pandora/constants"
-	"pandora/models"
 
-	"time"
-
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/sirupsen/logrus"
+
+	"pandora/database"
+	"pandora/models"
+	"pandora/utils"
 )
 
-/*
-	var th = theme.Theme{
-		TheTitle: "artzp",
+func init() {
+	logrus.SetOutput(os.Stdout)
+}
+
+func main() {
+	dbObj := &database.SqliteObj{}
+	db := dbObj.Get()
+
+	c := &models.Category{
+		SubjectsNum: 1,
 	}
+	c.Name = "artzp"
+	c.Title = "自拍"
+	c.URL = constants.BASE + c.Name
+	c.Create(db)
 	utils.ProcessDir("图片")
 
-	for _, sub := range th.GetSubjects() {
+	for _, sub := range c.ReapSubjects(db) {
 		utils.ProcessDir("图片/" + sub.SubTitle)
 
 		for _, img := range sub.Images {
-			fmt.Printf("Downloading: %v\n", img.ImgHref)
+			fmt.Printf("Downloading: %v\n", img.URL)
 			//Download(img)
 
 			//time.Sleep(time.Duration(15) * time.Second)
 		}
 	}
-*/
-func main() {
-	db, err := gorm.Open("sqlite3", "./db/test.db")
-	if err != nil {
-		return
-	}
-	defer db.Close()
-	c := models.Category{}
-	c.Name = "test"
-	c.Title = "teset"
-	c.URL = "http://test"
-	c.ReapStatus = constants.REAP_STATUS__NOTDONE
-	c.DownloadStatus = constants.DOWNLOAD_STATUS__NOTDONE
-	c.Created = time.Now().Unix()
-	c.Updated = time.Now().Unix()
-	c.Enabled = uint8(1)
-	c.SubjectsNum = 1
-	c.Limit = 2
-
-	db.AutoMigrate(&c)
-	db.Create(&c)
 }
 
 func Download(img models.Image) {

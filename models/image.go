@@ -1,8 +1,31 @@
 package models
 
+import (
+	"pandora/constants"
+	"time"
+
+	"github.com/jinzhu/gorm"
+)
+
 type Image struct {
+	// generic attributes of the image object
 	PandoraObj
-	CategoryID uint64
-	SubjectID  uint64
-	Base64     string
+	// categoryID indicates which category image belongs to
+	CategoryID uint64 `gorm:"column:f_category_id;" json:"category_id"`
+	// subjectID indicates where the image belongs to
+	SubjectID uint64 `gorm:"column:f_subject_id;" json:"subject_id"`
+	// base64 string, img content
+	Base64 string `gorm:"column:f_base64;" json:"base64"`
+}
+
+// Create db Record
+func (i *Image) Create(db *gorm.DB) error {
+	// default attributes
+	i.ReapStatus = constants.REAP_STATUS__NOTDONE
+	i.DownloadStatus = constants.DOWNLOAD_STATUS__NOTDONE
+	i.Created = time.Now().Unix()
+	i.Updated = time.Now().Unix()
+
+	db.AutoMigrate(i)
+	return db.Create(i).Error
 }
