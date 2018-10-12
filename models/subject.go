@@ -19,11 +19,11 @@ type Subject struct {
 	// generic attributes
 	PandoraObj
 	// categoryID where subject belongs to
-	CategoryID uint64 `gorm:"column:f_category_id" json:""`
+	CategoryID uint64 `gorm:"column:f_category_id;" json:""`
 	// images collection num
-	ImagesNum int8 `gorm:"column:f_images_num" json:""`
+	ImagesNum int8 `gorm:"column:f_images_num;default:0;" json:""`
 	// the thumb imageid
-	ThumbImageID uint64 `gorm:"column:f_thumb_image_id" json:""`
+	ThumbImageID uint64 `gorm:"column:f_thumb_image_id;default:0" json:""`
 	// images object collection
 	Images []Image `gorm:"-" json:"-"`
 }
@@ -41,7 +41,7 @@ func (s *Subject) Create(db *gorm.DB) error {
 }
 
 func (s Subject) ReapImages(db *gorm.DB) []Image {
-	url := constants.BASE + s.URL
+	url := s.URL
 	html := utils.GetHtml(url)
 	reg, _ := regexp.Compile(`img src="//(.*.jpg)"`)
 	urlsStr := reg.FindString(string(html))

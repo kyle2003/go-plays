@@ -15,7 +15,7 @@ type Image struct {
 	// subjectID indicates where the image belongs to
 	SubjectID uint64 `gorm:"column:f_subject_id;" json:"subject_id"`
 	// base64 string, img content
-	Base64 string `gorm:"column:f_base64;" json:"base64"`
+	Base64 string `gorm:"column:f_base64;type:text;" json:"base64"`
 }
 
 // Create db Record

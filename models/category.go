@@ -35,8 +35,7 @@ func (c *Category) Create(db *gorm.DB) error {
 
 // GetHtml content of the category page
 func (c *Category) GetHtml() string {
-	url := constants.BASE + c.Name
-	return string(utils.GetHtml(url))
+	return string(utils.GetHtml(c.URL))
 }
 
 // GetPageLimit get the limit of page
@@ -59,7 +58,8 @@ func (c *Category) ReapSubjects(db *gorm.DB) []Subject {
 		if match, _ := regexp.MatchString(".xml", subj); !match {
 			match := reg.FindStringSubmatchIndex(subj)
 			tmp := regColon.Split(string(reg.ExpandString(dst, template, subj, match)), 2)
-			obj.URL = tmp[0]
+			obj.Name = tmp[0]
+			obj.URL = constants.BASE + tmp[0]
 			obj.Title = tmp[1]
 			obj.Images = obj.ReapImages(db)
 			obj.CategoryID = c.ID

@@ -24,17 +24,15 @@ func main() {
 	dbObj := &database.SqliteObj{}
 	db := dbObj.Get()
 
-	c := &models.Category{
-		SubjectsNum: 1,
-	}
+	c := &models.Category{}
 	c.Name = "artzp"
 	c.Title = "自拍"
-	c.URL = constants.BASE + c.Name
-	c.Create(db)
+	c.URL = constants.BASE + "/" + c.Name + "/"
+	db.FirstOrCreate(c)
 	utils.ProcessDir("图片")
 
 	for _, sub := range c.ReapSubjects(db) {
-		utils.ProcessDir("图片/" + sub.SubTitle)
+		utils.ProcessDir("图片/" + sub.Title)
 
 		for _, img := range sub.Images {
 			fmt.Printf("Downloading: %v\n", img.URL)
