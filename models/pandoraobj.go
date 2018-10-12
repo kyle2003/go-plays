@@ -14,9 +14,9 @@ type PandoraObj struct {
 	// URL地址
 	URL string `gorm:"column:F_url;type:varchar(32);not null" json:"url"`
 	// 是否采集完成
-	ReapStatus constants.ReapStatus `gorm:"column:F_reap_status;default:0;index" json:"reap_status"`
+	ReapStatus constants.ReapStatus `gorm:"column:F_reap_status;default:2;index" json:"reap_status"`
 	// 下载完成状态
-	DownloadStatus constants.DownloadStatus `gorm:"column:F_download_status;type:int;default:0;index" json:"download_status"`
+	DownloadStatus constants.DownloadStatus `gorm:"column:F_download_status;type:int;default:2;index" json:"download_status"`
 	// 创建时间戳
 	Created int64 `gorm:"column:F_created;type:int;default:0" json:"created"`
 	// 更新时间戳

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -10,18 +9,20 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetHtml(url string) []byte {
+func GetHtml(url string) string {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		log.Fatalf("Failed to load: %s", url)
+		logrus.Fatalf("Failed to load: %s", url)
 	}
 	defer resp.Body.Close()
 
 	html, err := ioutil.ReadAll(resp.Body)
-	return html
+	return string(html)
 }
 
 func GetPageLimit(html string) int {
@@ -41,11 +42,12 @@ func RandStr(prefix string) string {
 	return prefix + strconv.Itoa(rand.Intn(1000))
 }
 
-func ProcessDir(dirPath string) {
+func ProcessDir(dirPath string) (err error) {
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 		var mode os.FileMode = 0777
-		os.Mkdir(dirPath, mode)
+		err = os.MkdirAll(dirPath, mode)
 	}
+	return
 }
 
 func Basename(s string) string {

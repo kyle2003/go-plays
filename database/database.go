@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/go-ini/ini"
 	"github.com/jinzhu/gorm"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
 )
 
