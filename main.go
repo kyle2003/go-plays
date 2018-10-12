@@ -15,5 +15,4 @@ func init() {
 
 func main() {
 	services.Start()
-	os.Exit(1)
 }

@@ -26,7 +26,7 @@ type Subject struct {
 	// the thumb imageid
 	ThumbImageID uint64 `gorm:"column:f_thumb_image_id;default:0;" json:""`
 	// images object collection
-	Images []Image `gorm:"-" json:"-"`
+	Images []*Image `gorm:"-" json:"-"`
 }
 
 // Create db
@@ -51,7 +51,7 @@ func (s *Subject) ReapImages(db *gorm.DB) error {
 	// 截取到的字符串
 	for _, str := range reg.Split(urlsStr, -1) {
 		if match, _ := regexp.MatchString(".*jpg", str); match {
-			var img Image
+			var img *Image
 			str = strings.Replace(str, " ", "", -1)
 			url := "http://" + regImg.ReplaceAllString(str, repl)
 

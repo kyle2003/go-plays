@@ -72,3 +72,7 @@ func initSubject() {
 		}
 	}
 }
+
+func initDownload() {
+
+}

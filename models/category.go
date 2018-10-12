@@ -21,7 +21,7 @@ type Category struct {
 	// subject nums
 	SubjectsNum int `gorm:"column:f_subjects_num;default:0;" json:"subjects_num"`
 	// subjects
-	Subjects []Subject `gorm:"-"`
+	Subjects []*Subject `gorm:"-"`
 }
 
 // Create db
@@ -61,7 +61,7 @@ func (c *Category) ReapSubjects(db *gorm.DB) error {
 	template := "$1:$2"
 	regColon, _ := regexp.Compile(`:`)
 	for _, subj := range reg.FindAllString(html, -1) {
-		var obj Subject
+		var obj *Subject
 
 		if match, _ := regexp.MatchString(".xml", subj); !match {
 			match := reg.FindStringSubmatchIndex(subj)
