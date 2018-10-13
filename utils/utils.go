@@ -43,6 +43,7 @@ func RandStr(prefix string) string {
 }
 
 func ProcessDir(dirPath string) (err error) {
+	logrus.Printf("path: %s", dirPath)
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 		var mode os.FileMode = 0777
 		err = os.MkdirAll(dirPath, mode)

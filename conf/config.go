@@ -7,4 +7,4 @@ import (
 )
 
 var GlobalDb = database.SqliteObj{}
-var Setup, _ = ini.Load("setup.ini")
+var Setup, _ = ini.Load("./conf/setup.ini")

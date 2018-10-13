@@ -58,14 +58,23 @@ func initCategory() {
 func initSubject() {
 	db := conf.GlobalDb.Get()
 	cList := operations.FetchCategoryList()
+	imgPath := conf.Setup.Section("download").Key("image_path").String()
 	for _, c := range cList {
 		err := c.ReapSubjects(db)
 		if err == nil {
 			for _, s := range c.Subjects {
-				utils.ProcessDir(conf.Setup.Section("download").Key("image_path").String() + c.Title + s.Title)
+				err := utils.ProcessDir(imgPath + c.Title + "/" + s.Title)
+				if err != nil {
+					logrus.Printf("Create dir failed: %v", err)
+					break
+				}
 				for _, i := range s.Images {
 					fmt.Printf("Downloading: %v\n", i.URL)
 				}
+				// update thumb image id
+				s.ThumbImageID = operations.FetchThumbImageBySubjectID(s.ID)
+				//logrus.Printf("thumbID: %v", s.ThumbImageID)
+				db.Save(&s)
 			}
 		} else {
 			logrus.Warnln("Failed to reap subjects for category: [ " + c.Title + " ]")

@@ -14,7 +14,8 @@ import (
 
 func DownloadSubject(s *models.Subject) {
 	for _, i := range s.Images {
-		go Download(i)
+		img := &i
+		go Download(img)
 	}
 }
 
@@ -45,5 +46,5 @@ func Download(img *models.Image) {
 
 	img.Base64 = base64.StdEncoding.EncodeToString(imgByte)
 	img.DownloadStatus = constants.DOWNLOAD_STATUS__DONE
-	db.Save(img)
+	db.Save(&img)
 }

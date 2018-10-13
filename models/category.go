@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 	"pandora/constants"
-	"pandora/utils"
 
 	"github.com/sirupsen/logrus"
 
@@ -21,7 +20,7 @@ type Category struct {
 	// subject nums
 	SubjectsNum int `gorm:"column:f_subjects_num;default:0;" json:"subjects_num"`
 	// subjects
-	Subjects []*Subject `gorm:"-"`
+	Subjects []Subject `gorm:"-"`
 }
 
 // Create db
@@ -34,34 +33,16 @@ func (c *Category) Create(db *gorm.DB) error {
 	return db.Create(c).Error
 }
 
-// GetHtml content of the category page
-func (c *Category) GetHtml() string {
-	html := utils.GetHtml(c.URL)
-	i := 1
-	for i < c.Limit {
-		index := "index" + string(i) + ".html"
-		html += utils.GetHtml(c.URL + "/" + index)
-		i++
-	}
-	return html
-}
-
-// GetPageLimit get the limit of page
-func (c *Category) GetPageLimit() int {
-	html := c.GetHtml()
-	return utils.GetPageLimit(html)
-}
-
 // ReapSubjects Reap the subject content
 func (c *Category) ReapSubjects(db *gorm.DB) error {
-	html := c.GetHtml()
+	html := c.GetHtml(c.Limit)
 
 	reg, _ := regexp.Compile(`<a href="(.*)" target="_blank" title="(.*)"`)
 	dst := []byte("")
 	template := "$1:$2"
 	regColon, _ := regexp.Compile(`:`)
 	for _, subj := range reg.FindAllString(html, -1) {
-		var obj *Subject
+		var obj Subject
 
 		if match, _ := regexp.MatchString(".xml", subj); !match {
 			match := reg.FindStringSubmatchIndex(subj)
@@ -76,13 +57,16 @@ func (c *Category) ReapSubjects(db *gorm.DB) error {
 				logrus.Warningf("%v", err)
 				continue
 			}
-
+			logrus.Printf("thumb imgId: %v", obj.Images[0].ID)
 			obj.ThumbImageID = obj.Images[0].ID
 			obj.ReapStatus = constants.REAP_STATUS__DONE
 			c.Subjects = append(c.Subjects, obj)
 			obj.Create(db)
+			c.SubjectsNum++
 		}
+		db.Save(c)
 	}
+	logrus.Println("test2")
 	if len(c.Subjects) == 0 {
 		return errors.New("Reap 0 subjects for category " + c.Title)
 	}
