@@ -19,8 +19,8 @@ For the [category] section, you could specify the relative category you wanna to
 
 ## Crawling process
 Ideal processes
-Done => 1. Init Category
-Done => 2. Reap Subjects
-Done => 3. Reap Images
-Done => 4. Download and Update t_image (routine complete the job)
-5. Provide web service to end User
+- Done => 1. Init Category
+- Done => 2. Reap Subjects
+- Done => 3. Reap Images
+- Done => 4. Download and Update t_image (routine complete the job)
+- 5. Provide web service to end User
