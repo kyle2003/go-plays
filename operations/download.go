@@ -31,7 +31,6 @@ func DownloadSubject(s *models.Subject) {
 }
 
 func download(img models.Image) error {
-	logrus.Println(img.URL)
 	resp, err := http.Get(img.URL)
 	if err != nil {
 		logrus.Printf("%v", err)
@@ -61,5 +60,16 @@ func download(img models.Image) error {
 	img.Base64 = base64.StdEncoding.EncodeToString(imgByte)
 	img.DownloadStatus = constants.DOWNLOAD_STATUS__DONE
 	db.Save(&img)
+
+	thumbID := FetchThumbImageBySubjectID(img.SubjectID)
+	if img.ID == thumbID {
+		s := models.Subject{
+			PandoraObj: models.PandoraObj{
+				ID: img.SubjectID,
+			},
+		}
+		s.DownloadStatus = constants.DOWNLOAD_STATUS__DONE
+		db.Save(&s)
+	}
 	return err
 }

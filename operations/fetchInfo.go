@@ -17,7 +17,7 @@ func FetchUnReapedCategoryList() []models.Category {
 	db := conf.GlobalDb.Get()
 	var categories []models.Category
 
-	db.Model(&models.Category{}).Where("f_reap_status=?", 2).Scan(&categories)
+	db.Model(&models.Category{}).Where("f_reap_status=? and f_enabled=?", 2, 1).Scan(&categories)
 	return categories
 }
 
@@ -33,7 +33,7 @@ func FetchReapedSubjectList() []models.Subject {
 	db := conf.GlobalDb.Get()
 	var subjs []models.Subject
 
-	db.Model(&models.Subject{}).Where("f_reap_status=? and f_download_status=?", 1, 2).Scan(&subjs)
+	db.Model(&models.Subject{}).Where("f_reap_status=? and f_download_status=? and f_enabled=?", 1, 2, 1).Scan(&subjs)
 	return subjs
 }
 
@@ -44,27 +44,27 @@ func FetchSubjectsByCategoryID(cID uint64) []models.Subject {
 func FetchThumbImageBySubjectID(sID uint64) uint64 {
 	db := conf.GlobalDb.Get()
 	var img models.Image
-	db.Where("f_category_id=?", sID).First(&img)
+	db.Where("f_category_id=? and f_enabled=?", sID, 1).Last(&img)
 	return img.ID
 }
 
 func GetCategoryTitleByID(cID uint64) string {
 	db := conf.GlobalDb.Get()
 	var c models.Category
-	db.Where("f_id=?", cID).First(&c)
+	db.Where("f_id=? and f_enabled=?", cID, 1).First(&c)
 	return c.Title
 }
 
 func GetImagesBySubjectID(sID uint64) []models.Image {
 	db := conf.GlobalDb.Get()
 	var images []models.Image
-	db.Model(&models.Image{}).Where("f_subject_id=?", sID).Scan(&images)
+	db.Model(&models.Image{}).Where("f_subject_id=? and f_enabled=?", sID, 1).Scan(&images)
 	return images
 }
 
 func GetNotDownloadedImagesBySubjectID(sID uint64) []models.Image {
 	db := conf.GlobalDb.Get()
 	var images []models.Image
-	db.Model(&models.Image{}).Where("f_subject_id=? and f_download_status=?", sID, 2).Scan(&images)
+	db.Model(&models.Image{}).Where("f_subject_id=? and f_download_status=? and f_enabled=?", sID, 2, 1).Scan(&images)
 	return images
 }

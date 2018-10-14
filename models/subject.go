@@ -61,8 +61,8 @@ func (s *Subject) ReapImages(db *gorm.DB) error {
 				img.SubjectID = s.ID
 				img.CategoryID = s.CategoryID
 				img.ReapStatus = constants.REAP_STATUS__DONE
-				s.Images = append(s.Images, img)
 				img.Create(db)
+				s.Images = append(s.Images, img)
 				s.ImagesNum++
 			}
 		}
@@ -70,8 +70,8 @@ func (s *Subject) ReapImages(db *gorm.DB) error {
 
 	// If 0 images reaped, then disable the subject
 	if s.ImagesNum == 0 {
-		s.Enabled = constants.BOOL__FALSE
-		return errors.New("Reaped 0 image links for " + s.Title)
+		return errors.New("Reaped 0 image links for subject: " + s.Title)
 	}
+	s.ThumbImageID = s.Images[s.ImagesNum-1].ID
 	return nil
 }

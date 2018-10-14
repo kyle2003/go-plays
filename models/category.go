@@ -54,14 +54,18 @@ func (c *Category) ReapSubjects(db *gorm.DB) error {
 			obj.Create(db)
 
 			err := obj.ReapImages(db)
+			if obj.ImagesNum == 0 {
+				obj.ReapStatus = constants.REAP_STATUS__NOTDONE
+				obj.Enabled = constants.BOOL__FALSE
+			} else {
+				obj.ReapStatus = constants.REAP_STATUS__DONE
+			}
+			db.Save(&obj)
 
 			if err != nil {
 				logrus.Warningf("%v", err)
 				continue
 			}
-			obj.ThumbImageID = obj.Images[0].ID
-			obj.ReapStatus = constants.REAP_STATUS__DONE
-			db.Save(&obj)
 
 			c.Subjects = append(c.Subjects, obj)
 			c.SubjectsNum++
