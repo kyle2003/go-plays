@@ -1,6 +1,8 @@
 package database
 
 import (
+	"pandora/utils"
+
 	"github.com/go-ini/ini"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
@@ -36,6 +38,8 @@ func (s *SqliteObj) Connect() error {
 		if cfg.Section("db").Haskey("db_path") {
 			dbPath = cfg.Section("db").Key("db_path").String()
 		}
+
+		utils.ProcessDir(dbPath)
 
 		if cfg.Section("db").Haskey("db_name") {
 			s.DbName = dbPath + cfg.Section("db").Key("db_name").String()

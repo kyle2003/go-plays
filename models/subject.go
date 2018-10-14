@@ -35,7 +35,7 @@ func (s *Subject) Create(db *gorm.DB) error {
 }
 
 func (s *Subject) ReapImages(db *gorm.DB) error {
-	html := s.GetHtml(0)
+	html := s.GetHTML(0)
 	reg, _ := regexp.Compile(`img src="//(.*.jpg)"`)
 	strs := reg.FindAllString(html, -1)
 	urlsStr := ""
@@ -68,7 +68,9 @@ func (s *Subject) ReapImages(db *gorm.DB) error {
 		}
 	}
 
+	// If 0 images reaped, then disable the subject
 	if s.ImagesNum == 0 {
+		s.Enabled = constants.BOOL__FALSE
 		return errors.New("Reaped 0 image links for " + s.Title)
 	}
 	return nil

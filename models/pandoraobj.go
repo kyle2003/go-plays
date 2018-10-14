@@ -14,7 +14,7 @@ type PandoraObj struct {
 	// 中文名
 	Title string `gorm:"column:F_title;type:text;not null" json:"title"`
 	// URL地址
-	URL string `gorm:"column:F_url;type:varchar(32);unique;not null" json:"url"`
+	URL string `gorm:"column:F_url;type:varchar(32);unique;index;not null" json:"url"`
 	// 是否采集完成
 	ReapStatus constants.ReapStatus `gorm:"column:F_reap_status;default:2;index" json:"reap_status"`
 	// 下载完成状态
@@ -24,12 +24,12 @@ type PandoraObj struct {
 	// 更新时间戳
 	Updated int64 `gorm:"column:F_updated;type:int;default:0" json:"updaeted"`
 	// 软删除
-	Enabled uint8 `gorm:"column:F_enabled;type:int;default:1;index" json:"enabled"`
+	Enabled constants.Bool `gorm:"column:F_enabled;type:int;default:1;index" json:"enabled"`
 }
 
-// GetHtml content of the category page
-func (p *PandoraObj) GetHtml(limit int) string {
-	html := utils.GetHtml(p.URL)
+// GetHTML content of the category page
+func (p *PandoraObj) GetHTML(limit int) string {
+	html := utils.GetHTML(p.URL)
 	i := 2
 	if limit == 0 {
 		limit = p.GetPageLimit()
@@ -37,7 +37,7 @@ func (p *PandoraObj) GetHtml(limit int) string {
 	for i <= limit {
 		index := "index" + strconv.Itoa(i) + ".html"
 		href := p.URL + index
-		html += utils.GetHtml(href)
+		html += utils.GetHTML(href)
 		i++
 	}
 	return html
@@ -45,6 +45,6 @@ func (p *PandoraObj) GetHtml(limit int) string {
 
 // GetPageLimit get the limit of page
 func (p *PandoraObj) GetPageLimit() int {
-	html := utils.GetHtml(p.URL)
+	html := utils.GetHTML(p.URL)
 	return utils.GetPageLimit(html)
 }

@@ -1,12 +1,12 @@
 package services
 
 import (
-	"fmt"
 	"pandora/conf"
 	"pandora/constants"
 	"pandora/models"
 	"pandora/operations"
 	"pandora/utils"
+	"strconv"
 
 	"github.com/go-ini/ini"
 	"github.com/sirupsen/logrus"
@@ -16,12 +16,19 @@ import (
 func Start() {
 	// Init category
 	initCategory()
-	initSubject()
+	if len(operations.FetchCategoryList()) > 0 {
+		initSubject()
+	}
+	initDownload()
 	//logrus.Debugf("%v", operations.FetchCategoryList())
 }
 
 func init() {
 	// Init glob db
+	db := conf.GlobalDb.Get()
+	db.AutoMigrate(&models.Category{})
+	db.AutoMigrate(&models.Subject{})
+	db.AutoMigrate(&models.Image{})
 }
 
 func initCategory() {
@@ -50,6 +57,9 @@ func initCategory() {
 		c.Name = name
 		c.Title = title
 		c.URL = constants.BASE + "/" + c.Name + "/"
+		if conf.Setup.Section("download").Haskey("default_limit") {
+			c.Limit, _ = strconv.Atoi(conf.Setup.Section("download").Key("default_limit").String())
+		}
 		c.Create(db)
 	}
 }
@@ -57,31 +67,35 @@ func initCategory() {
 // initSubject
 func initSubject() {
 	db := conf.GlobalDb.Get()
-	cList := operations.FetchCategoryList()
-	imgPath := conf.Setup.Section("download").Key("image_path").String()
+	cList := operations.FetchUnReapedCategoryList()
 	for _, c := range cList {
 		err := c.ReapSubjects(db)
-		if err == nil {
-			for _, s := range c.Subjects {
-				err := utils.ProcessDir(imgPath + c.Title + "/" + s.Title)
-				if err != nil {
-					logrus.Printf("Create dir failed: %v", err)
-					break
-				}
-				for _, i := range s.Images {
-					fmt.Printf("Downloading: %v\n", i.URL)
-				}
-				// update thumb image id
-				s.ThumbImageID = operations.FetchThumbImageBySubjectID(s.ID)
-				//logrus.Printf("thumbID: %v", s.ThumbImageID)
-				db.Save(&s)
-			}
-		} else {
+		if err != nil {
 			logrus.Warnln("Failed to reap subjects for category: [ " + c.Title + " ]")
 		}
 	}
 }
 
 func initDownload() {
+	sList := operations.FetchReapedSubjectList()
+	imgPath := conf.Setup.Section("download").Key("image_path").String()
 
+	for _, s := range sList {
+		cTitle := operations.GetCategoryTitleByID(s.CategoryID)
+		err := utils.ProcessDir(imgPath + cTitle + "/" + s.Title)
+		if err != nil {
+			logrus.Warnf("%v", err)
+			continue
+		}
+		operations.DownloadSubject(&s)
+	}
+
+	db := conf.GlobalDb.Get()
+	for _, s := range sList {
+		images := operations.GetNotDownloadedImagesBySubjectID(s.ID)
+		if len(images) == 0 {
+			s.DownloadStatus = constants.DOWNLOAD_STATUS__DONE
+			db.Save(s)
+		}
+	}
 }

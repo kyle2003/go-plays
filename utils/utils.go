@@ -13,7 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GetHtml(url string) string {
+func GetHTML(url string) string {
 	resp, err := http.Get(url)
 
 	if err != nil {
@@ -43,7 +43,6 @@ func RandStr(prefix string) string {
 }
 
 func ProcessDir(dirPath string) (err error) {
-	logrus.Printf("path: %s", dirPath)
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 		var mode os.FileMode = 0777
 		err = os.MkdirAll(dirPath, mode)

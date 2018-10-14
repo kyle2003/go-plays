@@ -35,7 +35,7 @@ func (c *Category) Create(db *gorm.DB) error {
 
 // ReapSubjects Reap the subject content
 func (c *Category) ReapSubjects(db *gorm.DB) error {
-	html := c.GetHtml(c.Limit)
+	html := c.GetHTML(c.Limit)
 
 	reg, _ := regexp.Compile(`<a href="(.*)" target="_blank" title="(.*)"`)
 	dst := []byte("")
@@ -51,22 +51,25 @@ func (c *Category) ReapSubjects(db *gorm.DB) error {
 			obj.URL = constants.BASE + tmp[0]
 			obj.Title = tmp[1]
 			obj.CategoryID = c.ID
+			obj.Create(db)
+
 			err := obj.ReapImages(db)
 
 			if err != nil {
 				logrus.Warningf("%v", err)
 				continue
 			}
-			logrus.Printf("thumb imgId: %v", obj.Images[0].ID)
 			obj.ThumbImageID = obj.Images[0].ID
 			obj.ReapStatus = constants.REAP_STATUS__DONE
+			db.Save(&obj)
+
 			c.Subjects = append(c.Subjects, obj)
-			obj.Create(db)
 			c.SubjectsNum++
 		}
-		db.Save(c)
 	}
-	logrus.Println("test2")
+	c.ReapStatus = constants.REAP_STATUS__DONE
+	db.Save(c)
+
 	if len(c.Subjects) == 0 {
 		return errors.New("Reap 0 subjects for category " + c.Title)
 	}
