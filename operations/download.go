@@ -6,16 +6,18 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"time"
+
 	"pandora/conf"
 	"pandora/constants"
 	"pandora/models"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
-func DownloadSubject(s *models.Subject) {
-	images := GetNotDownloadedImagesBySubjectID(s.ID)
+// DownloadSubject download images by subjectID
+func DownloadSubject(sID uint64) {
+	images := GetNotDownloadedImagesBySubjectID(sID)
 	for _, i := range images {
 		//go download(i)
 		x := rand.Intn(10)

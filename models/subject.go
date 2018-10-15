@@ -6,11 +6,11 @@ import (
 	"pandora/utils"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/jinzhu/gorm"
 )
 
+// Subject struct
 type Subject struct {
 	// generic attributes
 	PandoraObj
@@ -24,17 +24,8 @@ type Subject struct {
 	Images []Image `gorm:"-" json:"-"`
 }
 
-// Create db
-func (s *Subject) Create(db *gorm.DB) error {
-	// default attributes
-	s.Created = time.Now().Unix()
-	s.Updated = time.Now().Unix()
-
-	db.AutoMigrate(s)
-	return db.Create(s).Error
-}
-
-func (s *Subject) ReapImages(db *gorm.DB) error {
+// Reap reap images content
+func (s *Subject) Reap(db *gorm.DB) error {
 	html := s.GetHTML(0)
 	reg, _ := regexp.Compile(`img src="//(.*.jpg)"`)
 	strs := reg.FindAllString(html, -1)
@@ -50,20 +41,26 @@ func (s *Subject) ReapImages(db *gorm.DB) error {
 	// 截取到的字符串
 	for _, str := range reg.Split(urlsStr, -1) {
 		if match, _ := regexp.MatchString(".*jpg", str); match {
-			var img Image
+			var newImg *Image
+			var existedImg *Image
 			str = strings.Replace(str, " ", "", -1)
 			url := "http://" + regImg.ReplaceAllString(str, repl)
 
 			if m, _ := regexp.MatchString(".jpg$", url); m {
-				img.Name = utils.Basename(str)
-				img.URL = url
-				img.Title = s.Title
-				img.SubjectID = s.ID
-				img.CategoryID = s.CategoryID
-				img.ReapStatus = constants.REAP_STATUS__DONE
-				img.Create(db)
-				s.Images = append(s.Images, img)
-				s.ImagesNum++
+				newImg.Name = utils.Basename(str)
+				newImg.URL = url
+				newImg.Title = s.Title
+				newImg.ReapStatus = constants.REAP_STATUS__DONE
+				newImg.SubjectID = s.ID
+				newImg.CategoryID = s.CategoryID
+
+				// If not existed img, then create it
+				db.Where(newImg).First(existedImg)
+				if existedImg == nil {
+					newImg.Create(db)
+					s.ImagesNum++
+				}
+				//s.Images = append(s.Images, img)
 			}
 		}
 	}

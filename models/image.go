@@ -1,11 +1,6 @@
 package models
 
-import (
-	"time"
-
-	"github.com/jinzhu/gorm"
-)
-
+// Image struct
 type Image struct {
 	// generic attributes of the image object
 	PandoraObj
@@ -15,14 +10,4 @@ type Image struct {
 	SubjectID uint64 `gorm:"column:f_subject_id;index;" json:"subject_id"`
 	// base64 string, img content
 	Base64 string `gorm:"column:f_base64;type:text;" json:"base64"`
-}
-
-// Create db Record
-func (i *Image) Create(db *gorm.DB) error {
-	// default attributes
-	i.Created = time.Now().Unix()
-	i.Updated = time.Now().Unix()
-
-	db.AutoMigrate(i)
-	return db.Create(i).Error
 }

@@ -20,7 +20,6 @@ func Start() {
 		initSubject()
 	}
 	initDownload()
-	//logrus.Debugf("%v", operations.FetchCategoryList())
 }
 
 func init() {
@@ -31,6 +30,7 @@ func init() {
 	db.AutoMigrate(&models.Image{})
 }
 
+// initCategory
 func initCategory() {
 	// load category picked from setup.ini file
 	cfg, err := ini.Load("conf/setup.ini")
@@ -69,13 +69,14 @@ func initSubject() {
 	db := conf.GlobalDb.Get()
 	cList := operations.FetchUnReapedCategoryList()
 	for _, c := range cList {
-		err := c.ReapSubjects(db)
+		err := c.Reap(db)
 		if err != nil {
 			logrus.Warnln("Failed to reap subjects for category: [ " + c.Title + " ]")
 		}
 	}
 }
 
+// initDownload
 func initDownload() {
 	sList := operations.FetchReapedSubjectList()
 	imgPath := conf.Setup.Section("download").Key("image_path").String()
@@ -87,13 +88,13 @@ func initDownload() {
 			logrus.Warnf("%v", err)
 			continue
 		}
-		operations.DownloadSubject(&s)
+		operations.DownloadSubject(s.ID)
 	}
 
 	db := conf.GlobalDb.Get()
 	for _, s := range sList {
 		images := operations.GetNotDownloadedImagesBySubjectID(s.ID)
-		if len(images) == 0 {
+		if len(images) != 0 {
 			s.DownloadStatus = constants.DOWNLOAD_STATUS__DONE
 			db.Save(s)
 		}
