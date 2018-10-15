@@ -1,6 +1,7 @@
 package services
 
 import (
+	"net/http"
 	"pandora/conf"
 	"pandora/constants"
 	"pandora/models"
@@ -8,6 +9,7 @@ import (
 	"pandora/utils"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	"github.com/sirupsen/logrus"
 )
@@ -99,4 +101,16 @@ func initDownload() {
 			db.Save(s)
 		}
 	}
+}
+
+// Run run web service
+func Run() {
+	router := gin.Default()
+	router.LoadHTMLGlob("templates/**/*")
+	router.GET("index/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"title": "Posts",
+		})
+	})
+	router.Run()
 }
