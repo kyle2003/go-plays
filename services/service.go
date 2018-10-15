@@ -106,7 +106,7 @@ func initDownload() {
 // Run run web service
 func Run() {
 	router := gin.Default()
-	router.LoadHTMLGlob("templates/**/*")
+	router.LoadHTMLGlob("templates/*")
 	router.GET("index/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
 			"title": "Posts",
