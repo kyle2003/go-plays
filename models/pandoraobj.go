@@ -4,12 +4,8 @@ import (
 	"pandora/constants"
 	"pandora/utils"
 	"strconv"
-	"time"
-
-	"github.com/jinzhu/gorm"
 )
 
-// PandoraObj Struct, generic attributes
 type PandoraObj struct {
 	// 自增ID
 	ID uint64 `gorm:"primary_key;column:F_id;" json:"-"`
@@ -29,16 +25,6 @@ type PandoraObj struct {
 	Updated int64 `gorm:"column:F_updated;type:int;default:0" json:"updaeted"`
 	// 软删除
 	Enabled constants.Bool `gorm:"column:F_enabled;type:int;default:1;index" json:"enabled"`
-}
-
-// Create the with timestamp
-func (p *PandoraObj) Create(db *gorm.DB) error {
-	// default attributes
-	p.Created = time.Now().Unix()
-	p.Updated = time.Now().Unix()
-
-	db.AutoMigrate(p)
-	return db.Create(p).Error
 }
 
 // GetHTML content of the category page

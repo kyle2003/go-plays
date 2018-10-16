@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	"pandora/services"
-
 	"github.com/sirupsen/logrus"
+
+	"pandora/services"
 )
 
 func init() {

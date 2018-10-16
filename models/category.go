@@ -9,9 +9,9 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"regexp"
+	"time"
 )
 
-// Category struct
 type Category struct {
 	// object的属性
 	PandoraObj
@@ -23,50 +23,52 @@ type Category struct {
 	Subjects []Subject `gorm:"-"`
 }
 
-// Reap Reap the subject content
-func (c *Category) Reap(db *gorm.DB) error {
+// Create db
+func (c *Category) Create(db *gorm.DB) error {
+	// default attributes
+	c.Created = time.Now().Unix()
+	c.Updated = time.Now().Unix()
+
+	db.AutoMigrate(c)
+	return db.Create(c).Error
+}
+
+// ReapSubjects Reap the subject content
+func (c *Category) ReapSubjects(db *gorm.DB) error {
 	html := c.GetHTML(c.Limit)
 
 	reg, _ := regexp.Compile(`<a href="(.*)" target="_blank" title="(.*)"`)
 	dst := []byte("")
 	template := "$1:$2"
 	regColon, _ := regexp.Compile(`:`)
-	for _, str := range reg.FindAllString(html, -1) {
-		var newSubj Subject
-		var existedSubj *Subject
+	for _, subj := range reg.FindAllString(html, -1) {
+		var obj Subject
 
-		if match, _ := regexp.MatchString(".xml", str); !match {
-			match := reg.FindStringSubmatchIndex(str)
-			tmp := regColon.Split(string(reg.ExpandString(dst, template, str, match)), 2)
-			newSubj.Name = tmp[0]
-			newSubj.Title = tmp[1]
-			newSubj.URL = constants.BASE + tmp[0]
-			newSubj.CategoryID = c.ID
+		if match, _ := regexp.MatchString(".xml", subj); !match {
+			match := reg.FindStringSubmatchIndex(subj)
+			tmp := regColon.Split(string(reg.ExpandString(dst, template, subj, match)), 2)
+			obj.Name = tmp[0]
+			obj.URL = constants.BASE + tmp[0]
+			obj.Title = tmp[1]
+			obj.CategoryID = c.ID
+			obj.Create(db)
 
-			// Check the subj existed already
-			// if not create new one
-			db.Where(&newSubj).First(existedSubj)
-			if existedSubj == nil {
-				newSubj.Create(db)
-				c.SubjectsNum++
+			err := obj.ReapImages(db)
+			if obj.ImagesNum == 0 {
+				obj.ReapStatus = constants.REAP_STATUS__NOTDONE
+				obj.Enabled = constants.BOOL__FALSE
+			} else {
+				obj.ReapStatus = constants.REAP_STATUS__DONE
+			}
+			db.Save(&obj)
+
+			if err != nil {
+				logrus.Warningf("%v", err)
+				continue
 			}
 
-			// Check the subj reaped
-			if newSubj.ReapStatus != constants.REAP_STATUS__DONE {
-				err := newSubj.Reap(db)
-				if newSubj.ImagesNum == 0 {
-					newSubj.ReapStatus = constants.REAP_STATUS__NOTDONE
-					newSubj.Enabled = constants.BOOL__FALSE
-				} else {
-					newSubj.ReapStatus = constants.REAP_STATUS__DONE
-				}
-				db.Save(&newSubj)
-				if err != nil {
-					logrus.Warningf("%v", err)
-					continue
-				}
-			}
-			//c.Subjects = append(c.Subjects, newSubj)
+			c.Subjects = append(c.Subjects, obj)
+			c.SubjectsNum++
 		}
 	}
 	c.ReapStatus = constants.REAP_STATUS__DONE
