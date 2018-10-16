@@ -54,7 +54,7 @@ func (c *Category) Reap(db *gorm.DB) error {
 
 			// If subject existed
 			db.Where(&newSubj).First(&newSubj)
-			if newSubj.ID != uint64(0) {
+			if newSubj.ID == uint64(0) {
 				newSubj.Create(db)
 				c.SubjectsNum++
 			}
@@ -78,11 +78,12 @@ func (c *Category) Reap(db *gorm.DB) error {
 			//c.Subjects = append(c.Subjects, newSubj)
 		}
 	}
-	c.ReapStatus = constants.REAP_STATUS__DONE
-	db.Save(c)
 
 	if c.SubjectsNum == 0 {
 		return errors.New("Reap 0 subjects for category " + c.Title)
 	}
+	c.ReapStatus = constants.REAP_STATUS__DONE
+	db.Save(c)
+
 	return nil
 }

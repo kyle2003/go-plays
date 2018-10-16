@@ -65,7 +65,7 @@ func (s *Subject) Reap(db *gorm.DB) error {
 
 				// If image existed
 				db.Where(&newImg).First(&newImg)
-				if newImg.ID != uint64(0) {
+				if newImg.ID == uint64(0) {
 					newImg.Create(db)
 					s.ImagesNum++
 				}

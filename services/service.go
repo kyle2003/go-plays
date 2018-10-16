@@ -18,12 +18,10 @@ import (
 func Start() {
 	// Init category
 	initCategory()
-	/*
 		if len(operations.FetchCategoryList()) > 0 {
 			initSubject()
 		}
 		initDownload()
-	*/
 	//logrus.Debugf("%v", operations.FetchCategoryList())
 }
 
