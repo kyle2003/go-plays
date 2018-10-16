@@ -33,48 +33,55 @@ func (c *Category) Create(db *gorm.DB) error {
 	return db.Create(c).Error
 }
 
-// ReapSubjects Reap the subject content
-func (c *Category) ReapSubjects(db *gorm.DB) error {
+// Reap Reap the subject content
+func (c *Category) Reap(db *gorm.DB) error {
 	html := c.GetHTML(c.Limit)
 
 	reg, _ := regexp.Compile(`<a href="(.*)" target="_blank" title="(.*)"`)
 	dst := []byte("")
 	template := "$1:$2"
 	regColon, _ := regexp.Compile(`:`)
-	for _, subj := range reg.FindAllString(html, -1) {
-		var obj Subject
+	for _, subjStr := range reg.FindAllString(html, -1) {
+		var newSubj Subject
 
-		if match, _ := regexp.MatchString(".xml", subj); !match {
-			match := reg.FindStringSubmatchIndex(subj)
-			tmp := regColon.Split(string(reg.ExpandString(dst, template, subj, match)), 2)
-			obj.Name = tmp[0]
-			obj.URL = constants.BASE + tmp[0]
-			obj.Title = tmp[1]
-			obj.CategoryID = c.ID
-			obj.Create(db)
+		if match, _ := regexp.MatchString(".xml", subjStr); !match {
+			match := reg.FindStringSubmatchIndex(subjStr)
+			tmp := regColon.Split(string(reg.ExpandString(dst, template, subjStr, match)), 2)
+			newSubj.Name = tmp[0]
+			newSubj.URL = constants.BASE + tmp[0]
+			newSubj.Title = tmp[1]
+			newSubj.CategoryID = c.ID
 
-			err := obj.ReapImages(db)
-			if obj.ImagesNum == 0 {
-				obj.ReapStatus = constants.REAP_STATUS__NOTDONE
-				obj.Enabled = constants.BOOL__FALSE
-			} else {
-				obj.ReapStatus = constants.REAP_STATUS__DONE
-			}
-			db.Save(&obj)
-
-			if err != nil {
-				logrus.Warningf("%v", err)
-				continue
+			// If subject existed
+			db.Where(&newSubj).First(&newSubj)
+			if newSubj.ID != uint64(0) {
+				newSubj.Create(db)
+				c.SubjectsNum++
 			}
 
-			c.Subjects = append(c.Subjects, obj)
-			c.SubjectsNum++
+			// Check if images reaped
+			if newSubj.ReapStatus == constants.REAP_STATUS__NOTDONE {
+				err := newSubj.Reap(db)
+				if newSubj.ImagesNum == 0 {
+					newSubj.ReapStatus = constants.REAP_STATUS__NOTDONE
+					newSubj.Enabled = constants.BOOL__FALSE
+				} else {
+					newSubj.ReapStatus = constants.REAP_STATUS__DONE
+				}
+				db.Save(&newSubj)
+
+				if err != nil {
+					logrus.Warningf("%v", err)
+					continue
+				}
+			}
+			//c.Subjects = append(c.Subjects, newSubj)
 		}
 	}
 	c.ReapStatus = constants.REAP_STATUS__DONE
 	db.Save(c)
 
-	if len(c.Subjects) == 0 {
+	if c.SubjectsNum == 0 {
 		return errors.New("Reap 0 subjects for category " + c.Title)
 	}
 	return nil

@@ -34,7 +34,8 @@ func (s *Subject) Create(db *gorm.DB) error {
 	return db.Create(s).Error
 }
 
-func (s *Subject) ReapImages(db *gorm.DB) error {
+// Reap images for subject
+func (s *Subject) Reap(db *gorm.DB) error {
 	html := s.GetHTML(0)
 	reg, _ := regexp.Compile(`img src="//(.*.jpg)"`)
 	strs := reg.FindAllString(html, -1)
@@ -47,23 +48,31 @@ func (s *Subject) ReapImages(db *gorm.DB) error {
 	regImg, _ := regexp.Compile(`.*//(.*.jpg).*`)
 	repl := "${1}"
 
-	// 截取到的字符串
+	// Parse string
 	for _, str := range reg.Split(urlsStr, -1) {
 		if match, _ := regexp.MatchString(".*jpg", str); match {
-			var img Image
+			var newImg Image
 			str = strings.Replace(str, " ", "", -1)
 			url := "http://" + regImg.ReplaceAllString(str, repl)
 
 			if m, _ := regexp.MatchString(".jpg$", url); m {
-				img.Name = utils.Basename(str)
-				img.URL = url
-				img.Title = s.Title
-				img.SubjectID = s.ID
-				img.CategoryID = s.CategoryID
-				img.ReapStatus = constants.REAP_STATUS__DONE
-				img.Create(db)
-				s.Images = append(s.Images, img)
-				s.ImagesNum++
+				newImg.Name = utils.Basename(str)
+				newImg.URL = url
+				newImg.Title = s.Title
+				newImg.SubjectID = s.ID
+				newImg.CategoryID = s.CategoryID
+				newImg.ReapStatus = constants.REAP_STATUS__DONE
+
+				// If image existed
+				db.Where(&newImg).First(&newImg)
+				if newImg.ID != uint64(0) {
+					newImg.Create(db)
+					s.ImagesNum++
+				}
+
+				// Initialize the thumb imgeID
+				db.Where(&newImg).First(&newImg)
+				s.ThumbImageID = newImg.ID
 			}
 		}
 	}
@@ -72,6 +81,6 @@ func (s *Subject) ReapImages(db *gorm.DB) error {
 	if s.ImagesNum == 0 {
 		return errors.New("Reaped 0 image links for subject: " + s.Title)
 	}
-	s.ThumbImageID = s.Images[s.ImagesNum-1].ID
+	//s.ThumbImageID = s.Images[s.ImagesNum-1].ID
 	return nil
 }

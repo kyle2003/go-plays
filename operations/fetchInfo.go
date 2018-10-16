@@ -44,7 +44,7 @@ func FetchSubjectsByCategoryID(cID uint64) []models.Subject {
 func FetchThumbImageBySubjectID(sID uint64) uint64 {
 	db := conf.GlobalDb.Get()
 	var img models.Image
-	db.Where("f_category_id=? and f_enabled=?", sID, 1).Last(&img)
+	db.Where("f_subject_id=? and f_enabled=?", sID, 1).Last(&img)
 	return img.ID
 }
 

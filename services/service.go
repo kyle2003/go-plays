@@ -18,10 +18,12 @@ import (
 func Start() {
 	// Init category
 	initCategory()
-	if len(operations.FetchCategoryList()) > 0 {
-		initSubject()
-	}
-	initDownload()
+	/*
+		if len(operations.FetchCategoryList()) > 0 {
+			initSubject()
+		}
+		initDownload()
+	*/
 	//logrus.Debugf("%v", operations.FetchCategoryList())
 }
 
@@ -46,23 +48,21 @@ func initCategory() {
 		return
 	}
 
-	cList := operations.FetchCategoryList()
-	for _, c := range cList {
-		if _, ok := categories[c.Name]; ok {
-			delete(categories, c.Name)
-		}
-	}
-
 	db := conf.GlobalDb.Get()
 	for name, title := range categories {
-		c := &models.Category{}
+		c := models.Category{}
 		c.Name = name
 		c.Title = title
 		c.URL = constants.BASE + "/" + c.Name + "/"
+		db.Where(&c).First(&c)
+		if c.ID == uint64(0) {
+			c.Create(db)
+			db.Where(&c).First(&c)
+		}
 		if conf.Setup.Section("download").Haskey("default_limit") {
 			c.Limit, _ = strconv.Atoi(conf.Setup.Section("download").Key("default_limit").String())
 		}
-		c.Create(db)
+		db.Save(&c)
 	}
 }
 
@@ -71,7 +71,7 @@ func initSubject() {
 	db := conf.GlobalDb.Get()
 	cList := operations.FetchUnReapedCategoryList()
 	for _, c := range cList {
-		err := c.ReapSubjects(db)
+		err := c.Reap(db)
 		if err != nil {
 			logrus.Warnln("Failed to reap subjects for category: [ " + c.Title + " ]")
 		}
