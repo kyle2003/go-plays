@@ -20,6 +20,8 @@ type Subject struct {
 	ImagesNum int `gorm:"column:f_images_num;default:0;" json:""`
 	// the thumb imageid
 	ThumbImageID uint64 `gorm:"column:f_thumb_image_id;default:0;" json:""`
+	// thum imgename
+	ThumbImageName string `gorm:"column:f_thumb_image_name;" json:""`
 	// images object collection
 	Images []Image `gorm:"-" json:"-"`
 }
@@ -73,6 +75,7 @@ func (s *Subject) Reap(db *gorm.DB) error {
 				// Initialize the thumb imgeID
 				db.Where(&newImg).First(&newImg)
 				s.ThumbImageID = newImg.ID
+				s.ThumbImageName = newImg.Name
 			}
 		}
 	}
