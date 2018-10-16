@@ -1,7 +1,11 @@
 {{ define "index.tmpl" }}
-<html><h1>
-	{{ .title }}
-</h1>
-<p>Using users/index.tmpl</p>
+<html>
+<ul>
+	{{ range $i, $c := .Categories }}
+		<li>
+			<h1><a href="{{$c.Name}}">{{$c.Title}}</a> ({{$c.SubjectsNum}})</h1>
+		</li>
+	{{end}}
+</ul>
 </html>
 {{ end }}

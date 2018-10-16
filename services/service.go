@@ -1,15 +1,14 @@
 package services
 
 import (
-	"net/http"
 	"pandora/conf"
 	"pandora/constants"
 	"pandora/models"
 	"pandora/operations"
+	"pandora/operations/inner"
 	"pandora/utils"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
 	"github.com/sirupsen/logrus"
 )
@@ -17,12 +16,16 @@ import (
 // Start the craw and http service
 func Start() {
 	// Init category
-	initCategory()
-		if len(operations.FetchCategoryList()) > 0 {
+	/*
+		go func() {
+			initCategory()
 			initSubject()
-		}
-		initDownload()
-	//logrus.Debugf("%v", operations.FetchCategoryList())
+			initDownload()
+		}()
+	*/
+
+	// Provide the web services`
+	operations.Start()
 }
 
 func init() {
@@ -67,47 +70,39 @@ func initCategory() {
 // initSubject
 func initSubject() {
 	db := conf.GlobalDb.Get()
-	cList := operations.FetchUnReapedCategoryList()
+	cList := inner.FetchUnReapedCategoryList()
 	for _, c := range cList {
-		err := c.Reap(db)
-		if err != nil {
-			logrus.Warnln("Failed to reap subjects for category: [ " + c.Title + " ]")
+		if c.ReapStatus != constants.REAP_STATUS__DONE {
+			err := c.Reap(db)
+			if err != nil {
+				logrus.Warnln("Failed to reap subjects for category: [ " + c.Title + " ]")
+			}
 		}
 	}
 }
 
 func initDownload() {
-	sList := operations.FetchReapedSubjectList()
+	sList := inner.FetchReapedSubjectList()
 	imgPath := conf.Setup.Section("download").Key("image_path").String()
 
 	for _, s := range sList {
-		cTitle := operations.GetCategoryTitleByID(s.CategoryID)
-		err := utils.ProcessDir(imgPath + cTitle + "/" + s.Title)
-		if err != nil {
-			logrus.Warnf("%v", err)
-			continue
+		if s.DownloadStatus != constants.DOWNLOAD_STATUS__DONE {
+			cTitle := inner.GetCategoryTitleByID(s.CategoryID)
+			err := utils.ProcessDir(imgPath + cTitle + "/" + s.Title)
+			if err != nil {
+				logrus.Warnf("%v", err)
+				continue
+			}
+			inner.DownloadSubject(&s)
 		}
-		operations.DownloadSubject(&s)
 	}
 
 	db := conf.GlobalDb.Get()
 	for _, s := range sList {
-		images := operations.GetNotDownloadedImagesBySubjectID(s.ID)
+		images := inner.GetNotDownloadedImagesBySubjectID(s.ID)
 		if len(images) == 0 {
 			s.DownloadStatus = constants.DOWNLOAD_STATUS__DONE
 			db.Save(s)
 		}
 	}
-}
-
-// Run run web service
-func Run() {
-	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
-	router.GET("index/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"title": "Posts",
-		})
-	})
-	router.Run()
 }
