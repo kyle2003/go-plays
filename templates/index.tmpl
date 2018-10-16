@@ -3,7 +3,7 @@
 <ul>
 	{{ range $i, $c := .Categories }}
 		<li>
-			<h1><a href="{{$c.Name}}">{{$c.Title}}</a> ({{$c.SubjectsNum}})</h1>
+			<h1><a href="{{$c.ID}}">{{$c.Title}}</a> ({{$c.SubjectsNum}})</h1>
 		</li>
 	{{end}}
 </ul>

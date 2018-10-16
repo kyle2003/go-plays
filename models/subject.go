@@ -70,12 +70,12 @@ func (s *Subject) Reap(db *gorm.DB) error {
 				if newImg.ID == uint64(0) {
 					newImg.Create(db)
 					s.ImagesNum++
+					s.ThumbImageName = newImg.Name
 				}
 
 				// Initialize the thumb imgeID
 				db.Where(&newImg).First(&newImg)
 				s.ThumbImageID = newImg.ID
-				s.ThumbImageName = newImg.Name
 			}
 		}
 	}

@@ -10,10 +10,10 @@
     <title>Album example for Bootstrap</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="./css/album.css" rel="stylesheet">
+    <link href="/static/css/album.css" rel="stylesheet">
   </head>
 
   <body>
@@ -30,21 +30,23 @@
     </header>
 
     <main role="main">
-
+      {{$title := .Category.Title}}
       <div class="album py-5 bg-light">
         <div class="container">
-          {{ range $i, $s := .Subjects }}
           <div class="row">
+          {{ range $i, $s := .Subjects }}
             <div class="col-md-4">
               <div class="card mb-4 box-shadow">
-                <img class="card-img-top" data-src="images/{{$s.Title}}/{{$s.ThumbImageID}}.jpg" alt="Card image cap">
+                <a href="/subject/{{$s.ID}}">
+                <img class="card-img-top" src="/images/{{$title}}/{{$s.Title}}/{{$s.ThumbImageName}}.jpg" alt="Card image cap" style="width:348px;height:250px;">
+                </a>
                 <div class="card-body">
                   <p class="card-text">{{$s.Title}}, Total: {{$s.ImagesNum}}</p>
                 </div>
               </div>
             </div>
-          </div>
           {{end}}
+          </div>
         </div>
       </div>
 
@@ -63,7 +65,7 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="./js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
   </body>
 </html>
 {{end}}

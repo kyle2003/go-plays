@@ -16,14 +16,20 @@ import (
 // Start the craw and http service
 func Start() {
 	// Init category
-	/*
-		go func() {
-			initCategory()
-			initSubject()
-			initDownload()
-		}()
-	*/
+	go func() {
+		initCategory()
+		initSubject()
+		sList := inner.FetchReapedSubjectList()
 
+		initDownload(sList)
+	}()
+
+	go func() {
+		s := inner.FetchReapedSubjectList()
+		for len(inner.FetchReapedSubjectList()) > 0 {
+			initDownload(s)
+		}
+	}()
 	// Provide the web services`
 	operations.Start()
 }
@@ -81,8 +87,7 @@ func initSubject() {
 	}
 }
 
-func initDownload() {
-	sList := inner.FetchReapedSubjectList()
+func initDownload(sList []models.Subject) {
 	imgPath := conf.Setup.Section("download").Key("image_path").String()
 
 	for _, s := range sList {
