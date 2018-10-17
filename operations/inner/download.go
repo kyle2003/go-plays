@@ -58,6 +58,7 @@ func download(img models.Image) error {
 	db := conf.GlobalDb.Get()
 
 	img.Base64 = base64.StdEncoding.EncodeToString(imgByte)
+	img.ImagePath = file
 	img.DownloadStatus = constants.DOWNLOAD_STATUS__DONE
 	db.Save(&img)
 
@@ -68,6 +69,7 @@ func download(img models.Image) error {
 				ID: img.SubjectID,
 			},
 		}
+		db.Where(&s).First(&s)
 		s.DownloadStatus = constants.DOWNLOAD_STATUS__DONE
 		db.Save(&s)
 	}

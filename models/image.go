@@ -13,6 +13,8 @@ type Image struct {
 	CategoryID uint64 `gorm:"column:f_category_id;index;" json:"category_id"`
 	// subjectID indicates where the image belongs to
 	SubjectID uint64 `gorm:"column:f_subject_id;index;" json:"subject_id"`
+	// imgPath string, img content
+	ImagePath string `gorm:"column:f_image_path;type:text; json:"image_path"`
 	// base64 string, img content
 	Base64 string `gorm:"column:f_base64;type:text;" json:"base64"`
 }

@@ -52,6 +52,13 @@ func GetThumbImageBySubjectID(sID uint64) uint64 {
 	return img.ID
 }
 
+func GetCategoryByID(cID uint64) models.Category {
+	db := conf.GlobalDb.Get()
+	var c models.Category
+	db.Where("f_id=?", cID).First(&c)
+	return c
+}
+
 func GetCategoryTitleByID(cID uint64) string {
 	db := conf.GlobalDb.Get()
 	var c models.Category
@@ -73,9 +80,11 @@ func GetNotDownloadedImagesBySubjectID(sID uint64) []models.Image {
 	return images
 }
 
-func GetCategoryByID(cID uint64) models.Category {
+func GetSubjectByID(sID uint64) models.Subject {
 	db := conf.GlobalDb.Get()
-	var c models.Category
-	db.Where("f_id=?", cID).First(&c)
-	return c
+	var s models.Subject
+	s.ID = sID
+
+	db.Where(&s).First(&s)
+	return s
 }

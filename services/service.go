@@ -8,6 +8,7 @@ import (
 	"pandora/operations/inner"
 	"pandora/utils"
 	"strconv"
+	"time"
 
 	"github.com/go-ini/ini"
 	"github.com/sirupsen/logrus"
@@ -25,6 +26,7 @@ func Start() {
 	}()
 
 	go func() {
+		time.Sleep(time.Duration(120) * time.Second)
 		s := inner.FetchReapedSubjectList()
 		for len(inner.FetchReapedSubjectList()) > 0 {
 			initDownload(s)
@@ -87,6 +89,7 @@ func initSubject() {
 	}
 }
 
+// init Download
 func initDownload(sList []models.Subject) {
 	imgPath := conf.Setup.Section("download").Key("image_path").String()
 

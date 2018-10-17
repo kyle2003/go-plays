@@ -23,5 +23,6 @@ func Start() {
 		})
 	})
 	router.GET("index/:id", web.GetCategoryDetails)
+	router.GET("index/:cid/:sid", web.GetSubjectDetails)
 	router.Run()
 }
