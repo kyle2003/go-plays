@@ -10,7 +10,7 @@ import (
 
 // atoi
 func atoi(c *gin.Context) uint64 {
-	x, _ := strconv.Atoi(c.Param("id"))
+	x, _ := strconv.Atoi(c.Param("cid"))
 	return uint64(x)
 }
 
@@ -20,10 +20,12 @@ func GetCategoryDetails(c *gin.Context) {
 
 	subjects := inner.FetchSubjectsByCategoryID(id)
 	category := inner.GetCategoryByID(id)
+	categories := inner.FetchCategoryList()
 
 	c.HTML(http.StatusOK, "category.tmpl", gin.H{
-		"Category": category,
-		"Subjects": subjects,
+		"Category":   category,
+		"Categories": categories,
+		"Subjects":   subjects,
 	})
 }
 
@@ -32,11 +34,13 @@ func GetSubjectDetails(c *gin.Context) {
 	x, _ := strconv.Atoi(c.Param("sid"))
 	sid := uint64(x)
 
+	categories := inner.FetchCategoryList()
 	subjects := inner.GetSubjectByID(sid)
 	images := inner.GetImagesBySubjectID(sid)
 
 	c.HTML(http.StatusOK, "subject.tmpl", gin.H{
-		"Images":   images,
-		"Subjects": subjects,
+		"Categories": categories,
+		"Subjects":   subjects,
+		"Images":     images,
 	})
 }

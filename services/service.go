@@ -17,21 +17,24 @@ import (
 // Start the craw and http service
 func Start() {
 	// Init category
+	initCategory()
 	go func() {
-		initCategory()
 		initSubject()
+		initCategory()
 		sList := inner.FetchReapedSubjectList()
-
 		initDownload(sList)
 	}()
 
 	go func() {
+		// Need time to harvest the subjects
 		time.Sleep(time.Duration(120) * time.Second)
 		s := inner.FetchReapedSubjectList()
 		for len(inner.FetchReapedSubjectList()) > 0 {
 			initDownload(s)
+			time.Sleep(time.Duration(10) * time.Second)
 		}
 	}()
+
 	// Provide the web services`
 	operations.Start()
 }

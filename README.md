@@ -23,4 +23,7 @@ Ideal processes
 - Done => 2. Reap Subjects
 - Done => 3. Reap Images
 - Done => 4. Download and Update t_image (routine complete the job)
-- 5. Provide web service to end User
+- Done 5. Provide web service to end User
+
+Finish it in a rush, might take some time to optimze the web service and 
+reaping performance, like it, start it

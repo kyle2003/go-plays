@@ -1,11 +1,4 @@
 {{ define "index.tmpl" }}
-<html>
-<ul>
-	{{ range $i, $c := .Categories }}
-		<li>
-			<h1><a href="{{$c.ID}}">{{$c.Title}}</a> ({{$c.SubjectsNum}})</h1>
-		</li>
-	{{end}}
-</ul>
-</html>
-{{ end }}
+{{ template "header.tmpl" .}}
+{{template "footer.tmpl" .}}
+{{end}}

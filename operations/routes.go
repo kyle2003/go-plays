@@ -22,7 +22,7 @@ func Start() {
 			"Categories": categories,
 		})
 	})
-	router.GET("index/:id", web.GetCategoryDetails)
+	router.GET("index/:cid", web.GetCategoryDetails)
 	router.GET("index/:cid/:sid", web.GetSubjectDetails)
 	router.Run()
 }
