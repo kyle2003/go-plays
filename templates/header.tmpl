@@ -26,7 +26,7 @@
           </a>
           <nav class="nav">
 	          {{ range $i, $c := .Categories }}
-              <a class="text-white nav-link" href="{{$c.ID}}">{{$c.Title}}</a>
+              <a class="text-white nav-link" href="/index/{{$c.ID}}">{{$c.Title}}</a>
 	          {{end}}
           </nav>
         </div>

@@ -17,21 +17,16 @@ import (
 // Start the craw and http service
 func Start() {
 	// Init category
-	initCategory()
 	go func() {
-		initSubject()
 		initCategory()
-		sList := inner.FetchReapedSubjectList()
-		initDownload(sList)
+		initSubject()
 	}()
 
 	go func() {
 		// Need time to harvest the subjects
-		time.Sleep(time.Duration(120) * time.Second)
-		s := inner.FetchReapedSubjectList()
-		for len(inner.FetchReapedSubjectList()) > 0 {
-			initDownload(s)
-			time.Sleep(time.Duration(10) * time.Second)
+		for {
+			time.Sleep(time.Duration(60) * time.Second)
+			initDownload()
 		}
 	}()
 
@@ -93,7 +88,8 @@ func initSubject() {
 }
 
 // init Download
-func initDownload(sList []models.Subject) {
+func initDownload() {
+	sList := inner.FetchReapedSubjectList()
 	imgPath := conf.Setup.Section("download").Key("image_path").String()
 
 	for _, s := range sList {

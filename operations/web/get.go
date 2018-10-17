@@ -36,7 +36,7 @@ func GetSubjectDetails(c *gin.Context) {
 
 	categories := inner.FetchCategoryList()
 	subjects := inner.GetSubjectByID(sid)
-	images := inner.GetImagesBySubjectID(sid)
+	images := inner.GetDownloadedImagesBySubjectID(sid)
 
 	c.HTML(http.StatusOK, "subject.tmpl", gin.H{
 		"Categories": categories,

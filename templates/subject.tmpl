@@ -1,10 +1,12 @@
 {{ define "subject.tmpl" }}
-{{ template "header.tmpl" }}
+{{ template "header.tmpl" .}}
 <p class="text-center"> {{ .Subject.Title }} </p>
+<div id="container">
 {{ range $i, $img := .Images }}
-    <div class="card mb-3">
-        <img class="card-img-top" src="{{$img.ImagePath}}" alt="$img.Title">
+    <div class="card mb-3 m-auto" style="max-width:800px">
+        <img class="card-img-top" src="/{{$img.ImagePath}}" alt="{{$img.Title}}">
     </div>
 {{ end}}
+</div>
 {{template "footer.tmpl" .}}
 {{end}}

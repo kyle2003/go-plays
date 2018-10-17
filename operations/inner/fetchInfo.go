@@ -80,6 +80,13 @@ func GetNotDownloadedImagesBySubjectID(sID uint64) []models.Image {
 	return images
 }
 
+func GetDownloadedImagesBySubjectID(sID uint64) []models.Image {
+	db := conf.GlobalDb.Get()
+	var images []models.Image
+	db.Model(&models.Image{}).Where("f_subject_id=? and f_download_status=? and f_enabled=?", sID, 1, 1).Scan(&images)
+	return images
+}
+
 func GetSubjectByID(sID uint64) models.Subject {
 	db := conf.GlobalDb.Get()
 	var s models.Subject
