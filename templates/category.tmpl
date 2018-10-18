@@ -8,8 +8,8 @@
           {{ range $i, $s := .Subjects }}
             <div class="col-md-4">
               <div class="card mb-4 box-shadow">
-                <a href="/index/{{$s.CategoryID}}/{{$s.ID}}">
-                <img class="card-img-top align-center" src="/images/{{$title}}/{{$s.Title}}/{{$s.ThumbImageName}}.jpg" alt="{{$s.Name}}" style="width:348px;height:250px;">
+                <a href="/index/{{$s.CategoryID}}/{{$s.ID}}" target="_blank">
+                  <img class="card-img-top align-center" src="/images/{{$title}}/{{$s.Title}}/{{$s.ThumbImageName}}.jpg" alt="{{$s.Name}}" style="width:348px;height:250px;">
                 </a>
                 <div class="card-body">
                   <p class="card-text">{{$s.Title}}, Total: {{$s.ImagesNum}}</p>

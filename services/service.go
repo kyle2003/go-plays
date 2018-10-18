@@ -16,7 +16,7 @@ import (
 
 // Start the craw and http service
 func Start() {
-	// Init category
+	// Init category and harvest subjects
 	go func() {
 		initCategory()
 		initSubject()
@@ -34,6 +34,7 @@ func Start() {
 	operations.Start()
 }
 
+// populate tables
 func init() {
 	// Init glob db
 	db := conf.GlobalDb.Get()
