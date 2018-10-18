@@ -29,6 +29,7 @@ func GetCategoryDetails(c *gin.Context) {
 	})
 }
 
+// GetSubjectDetails Get images of the subject
 func GetSubjectDetails(c *gin.Context) {
 	//cid, _ := strconv.Atoi(c.Param("cid"))
 	x, _ := strconv.Atoi(c.Param("sid"))
